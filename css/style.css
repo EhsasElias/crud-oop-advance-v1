@@ -1,0 +1,159 @@
+body{
+    direction: rtl;
+}
+nav{
+    background-color: #f9fafc;
+    color: #455570;
+    
+}
+nav div{
+    display: flex;
+    justify-content: center;
+}
+nav div a{
+    text-decoration: none;
+    display: block;
+    color: inherit;
+    padding: 10px;
+    font-size: 18px;
+    font-weight: 400;
+    border-right: 1px solid #e5e9f2;
+}
+nav div a:first-child{
+    font-weight: 600;
+    border-right: none;
+}
+nav div a:last-child{
+    font-weight: 600;
+}
+.svgs a{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+}
+.svg{
+    margin: 0 7px;
+}
+.language{
+   display: flex; 
+   align-items: center;
+   
+   
+}
+.language p{
+    padding: 0 8px;
+}
+nav div a span{
+    padding: 10px;
+}
+.logo{
+    
+    display: flex;
+    align-items: center;
+}
+.header-bottom{
+    display: flex;
+    justify-content: center;
+    
+    
+    padding: 10px 90px;
+    
+}
+.header-bottom div:first-child{
+display: flex;
+width: 100%;
+
+
+}
+.header-bottom img{
+    display: block;
+    
+   
+}
+.search-div{
+    
+    margin: 15px;
+    
+    display: inline-flex;
+    height: 100%;
+    font-size: 25px;
+}
+.search-div input{
+    
+    border: none;
+    background-color: #eff2f7;
+    padding:10px 250px;
+    border-bottom-right-radius: 50px;
+    border-top-right-radius: 50px;
+}
+.search-div button{
+    border: none;
+    background-color: #eff2f7;
+    padding: 10px;
+    border-bottom-left-radius: 50px;
+    border-top-left-radius: 50px;
+}
+.shopping{
+    border-radius: 50px;
+    margin-right: 35px;
+    padding: 10px;
+    background-color: #eff2f7;
+  text-decoration: none;
+  color: inherit;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+    
+}
+.cart_count{
+    text-align: center;
+    padding: 0 0.9rem;
+    border-radius: 3rem;
+}
+.logoResponsive{
+    display: none;
+}
+#login{
+    cursor: pointer;
+}
+img{
+    max-width: 100%;
+    height: auto;
+  
+}
+.shopping-card{
+    padding: 3% 0;
+}
+
+.fa-star,
+.fa-star-o{
+ 
+    padding: 3% 0;
+}
+.star{
+    color: #d3dce6;
+}
+.bookRefer{
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    padding: 10px;
+    
+    }
+    .bookRefer .bookReferFont{
+        padding: 10px;
+        border-radius: 50%;
+        background-color: red;
+        border: none;
+    }
+    .bookRefer .fa{
+        font-size: 25px;
+        color: white;
+    }
+    .cart-items + .cart-items{
+        padding: 2% 0;
+    }
+    .price-details h6{
+        padding: 3% 2%;
+    }
