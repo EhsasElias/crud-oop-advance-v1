@@ -13,11 +13,14 @@ class DB {
     private $alias;
     private $column = [];
     private $conditions = [];
+    private $on = [];
+    private $orconditions = [];
     private $values = [];
     private $order = [];
     private $group = [];
     private $innerJoin = [];
     private $leftjoin = [];
+    private $rightjoin = [];
     private $outerjoin = [];
     private $limit;
 
@@ -56,6 +59,16 @@ class DB {
         $this->conditions = $where;
         return $this;
     }
+    public function orwhere(string ...$orwhere)
+    {
+        $this->orconditions = $orwhere;
+        return $this;
+    }
+    public function on(string ...$on)
+    {
+        $this->on = $on;
+        return $this;
+    }
     public function group(string ...$group)
     {
         $this->group = $group;
@@ -82,6 +95,10 @@ class DB {
             $this->leftjoin= $leftjoin;
             return $this;
     }
+    public function rightjoin(string ...$rightjoin){
+        $this->rightjoin = $rightjoin;
+        return $this;
+    }
     public function values(...$values)
     {
         $this->values = $values;
@@ -90,17 +107,27 @@ class DB {
 
     public function select()
     {
-        $where = $this->conditions === [] ? '' : ' WHERE ' . implode(' OR ', $this->conditions);
+        $where = $this->conditions === [] ? '' : ' WHERE ' . implode(' AND ', $this->conditions);
+        $on = $this->on === [] ? '' : ' ON ' . implode(' AND ', $this->on);
+        $orwhere = $this->orconditions === [] ? '' : ' WHERE ' . implode(' OR ', $this->orconditions);
         $order = $this->order === [] ? '' : ' ORDER BY ' . implode(' , ', $this->order);
         $group = $this->group === [] ? '' : ' GROUP BY ' . implode(' , ', $this->group);
 
-        $innerjoin = $this->innerJoin === [] ? '' : ' INNER JOIN '. implode(' INNER JOIN ', $this->innerJoin);
-        $outerjoin = $this->outerjoin === [] ? '' : ' OUTER JOIN '.implode(' OUTER JOIN ', $this->outerjoin);
-        $leftjoin = $this->leftjoin === [] ? '' : ' LEFT JOIN '. implode(' LEFT JOIN ', $this->leftjoin);
-        $limt = $this->limit === null ? '' : ' LIMIT ' . $this->limit;
+        $innerjoin = $this->innerJoin === [] ? '' : ' INNER JOIN '. implode(' INNER JOIN ', $this->innerJoin). $on;
+       
+        $leftjoin = $this->leftjoin === [] ? '' : ' LEFT JOIN '. implode(' LEFT JOIN ', $this->leftjoin). $on;
+        $rightjoin = $this->rightjoin === [] ? '' : ' RIGHT JOIN '. implode(' RTGHT JOIN ', $this->rightjoin). $on;
+        
+        $limit = $this->limit === null ? '' : ' LIMIT ' . $this->limit;
         $column  = $this->column === [] ? '*' : implode(',', $this->column);
 
-        $sql = "SELECT " . $column . ' FROM ' . $this->table .$leftjoin .$innerjoin. $outerjoin .$where .$group .$order .$limt;
+        $outerjoin = $this->outerjoin === [] ? '' : " UNION SELECT $column FROM ".$this->table  .$rightjoin ;
+        $sql = "SELECT " . $column . ' FROM ' . $this->table .$leftjoin .$innerjoin. $outerjoin  .$limit .$where .$orwhere .$group .$order;
+   
+        
+       
+        echo $sql;
+        
         $stm = $this->conn->prepare($sql);
         if ($stm->execute())
         {
@@ -113,21 +140,21 @@ class DB {
         $column = $this->column === [] ? '' : " (". implode(',', $this->column) .") ";
         $values = "(' ". implode("','", $this->values) . " ')";
 
-        $sql = "INSERT INTO " . $this->table . $column . " VALUES " . $values;
+        $sql = "INSERT INTO " . $this->table . 'COUNT('.$column.')' . " VALUES " . $values;
 
         $this->conn->prepare($sql)->execute();
     }
 
     public function delete()
     {
-        $where = $this->conditions === [] ? '' : ' WHERE ' . implode(' OR ', $this->conditions);
+        $where = $this->conditions === [] ? '' : ' WHERE ' . implode(' AND ', $this->conditions);
 
         $sql = "DELETE FROM ". $this->table . $where;
         $this->conn->prepare($sql)->execute();
     }
 
     public function update(){
-        $where = " WHERE " . implode(' OR ', $this->conditions);
+        $where = " WHERE " . implode(' AND ', $this->conditions);
 
         $values = implode(', ', $this->values);
 
@@ -140,7 +167,7 @@ class DB {
 
 }
 $product = new DB();
-$product->table('products')->column("COUNT('*')")->order('price')->select();
+$product->table('products')->column()->order('price')->select();
 echo "<hr>";
 echo "<h2>Order By</h2>";
 foreach ($product->result as $p) {
@@ -164,28 +191,66 @@ foreach ($product1->result as $p) {
 
 }
 echo "<hr>";
-echo "<h2>Inner Join</h2>";
+echo "<h2>Count</h2>";
 $product2 = new DB();
-$product2->table('products','p')->column()->Innerjoin('products')->select();
+$product2->table('products')->column()->select();
 foreach ($product2->result as $p) {
+    echo $p['name']."<br>";
+    echo $p['price']."<br>";
+    echo $p['details']."<br>";
+}
+
+echo "<hr>";
+echo "<h2>Inner Join</h2>";
+$product3 = new DB();
+$product3->table('products')->column()->Innerjoin('books')->on("books.id=products.id")->select();
+foreach ($product3->result as $p) {
     echo $p['name']."<br>";
     echo $p['price']."<br>";
     echo $p['details']."<br>";
 }
 echo "<hr>";
 echo "<h2>Left Join</h2>";
-$product3 = new DB();
-$product3->table('products','p')->column()->leftjoin('products')->select();
-foreach ($product3->result as $p) {
+$product4 = new DB();
+$product4->table('products')->column()->leftjoin('books')->on("books.id=products.id")->select();
+foreach ($product4->result as $p) {
     echo $p['name']."<br>";
     echo $p['price']."<br>";
     echo $p['details']."<br>";
 }
 echo "<hr>";
 echo "<h2>Outer Join</h2>";
-$product3 = new DB();
-$product3->table('products','p')->column()->Outerjoin('products')->select();
-foreach ($product3->result as $p) {
+$product5 = new DB();
+
+$product5->table('products')->column()->Outerjoin("*")->leftjoin('books')->on("books.id=products.id")->rightjoin("books")->on("books.id=products.id")->select();
+foreach ($product5->result as $p) {
+    echo $p['name']."<br>";
+    echo $p['price']."<br>";
+    echo $p['details']."<br>";
+}
+echo "<hr>";
+echo "<h2>Limit</h2>";
+$product6 = new DB();
+$product6->table('products')->column()->limit(2)->select();
+foreach ($product6->result as $p) {
+    echo $p['name']."<br>";
+    echo $p['price']."<br>";
+    echo $p['details']."<br>";
+}
+echo "<hr>";
+echo "<h2>Where</h2>";
+$product7 = new DB();
+$product7->table('products','p')->column()->where('name="apple"','id="1"')->select();
+foreach ($product7->result as $p) {
+    echo $p['name']."<br>";
+    echo $p['price']."<br>";
+    echo $p['details']."<br>";
+}
+echo "<hr>";
+echo "<h2>Or Where</h2>";
+$product8 = new DB();
+$product8->table('products','p')->column()->orwhere('name="apple"','id="6"')->select();
+foreach ($product8->result as $p) {
     echo $p['name']."<br>";
     echo $p['price']."<br>";
     echo $p['details']."<br>";
